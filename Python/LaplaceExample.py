@@ -2,7 +2,7 @@
 
 #> \file
 #> \author Chris Bradley
-#> \brief This is an example script to solve a Laplace problem using OpenCMISS-Iron calls in python.
+#> \brief This is an example script to solve a Laplace problem using OpenCMISS calls in python.
 #>
 #> \section LICENSE
 #>
@@ -39,15 +39,6 @@
 #> and other provisions required by the GPL or the LGPL. if you do not delete
 #> the provisions above, a recipient may use your version of this file under
 #> the terms of any one of the MPL, the GPL or the LGPL.
-#>
-
-#> \example ClassicalField/Laplace/LaplacePy/LaplaceExample.py
-## Example script to solve a Laplace problem using OpenCMISS-Iron calls in python.
-## \par Latest Builds:
-## \li <a href='http://autotest.bioeng.auckland.ac.nz/opencmiss-build/logs_x86_64-linux/ClassicalField/Laplace/LaplacePy/build-intel'>Linux Intel Build</a>
-## \li <a href='http://autotest.bioeng.auckland.ac.nz/opencmiss-build/logs_x86_64-linux/ClassicalField/Laplace/LaplacePy/build-gnu'>Linux GNU Build</a>
-#<
-
 
 # Add Python bindings directory to PATH
 import sys, os
@@ -56,27 +47,6 @@ sys.path.append(os.sep.join((os.environ['OPENCMISS_ROOT'],'cm','bindings','pytho
 # Intialise OpenCMISS start
 from opencmiss import iron
 # Intialise OpenCMISS end
-
-# Set problem parameters
-height = 1.0
-width = 2.0
-length = 3.0
-
-(coordinateSystemUserNumber,
-    regionUserNumber,
-    basisUserNumber,
-    generatedMeshUserNumber,
-    meshUserNumber,
-    decompositionUserNumber,
-    geometricFieldUserNumber,
-    equationsSetFieldUserNumber,
-    dependentFieldUserNumber,
-    equationsSetUserNumber,
-    problemUserNumber) = range(1,12)
-
-numberGlobalXElements = 5
-numberGlobalYElements = 5
-numberGlobalZElements = 5
 
 iron.DiagnosticsSetOn(iron.DiagnosticTypes.IN,[1,2,3,4,5],"Diagnostics",["DOMAIN_MAPPINGS_LOCAL_FROM_GLOBAL_CALCULATE"])
 
@@ -91,6 +61,7 @@ computationalNodeNumber = iron.ComputationalNodeNumberGet()
 coordinateSystem = iron.CoordinateSystem()
 #DOC-END coordinate1
 #DOC-START coordinate2
+coordinateSystemUserNumber = 1
 coordinateSystem.CreateStart(coordinateSystemUserNumber)
 #DOC-END coordinate2
 #DOC-START coordinate3
@@ -102,6 +73,7 @@ coordinateSystem.CreateFinish()
 
 # Create a region
 #DOC-START region
+regionUserNumber = 1
 region = iron.Region()
 region.CreateStart(regionUserNumber,iron.WorldRegion)
 region.label = "LaplaceRegion"
@@ -111,6 +83,7 @@ region.CreateFinish()
 
 # Create a tri-linear lagrange basis
 #DOC-START basis
+basisUserNumber = 1
 basis = iron.Basis()
 basis.CreateStart(basisUserNumber)
 basis.type = iron.BasisTypes.LAGRANGE_HERMITE_TP
@@ -122,6 +95,15 @@ basis.CreateFinish()
 
 # Create a generated mesh
 #DOC-START generated mesh
+height = 1.0
+width  = 2.0
+length = 3.0
+numberGlobalXElements = 5
+numberGlobalYElements = 5
+numberGlobalZElements = 5
+
+meshComponentNumber = 1
+generatedMeshUserNumber = 1
 generatedMesh = iron.GeneratedMesh()
 generatedMesh.CreateStart(generatedMeshUserNumber,region)
 generatedMesh.type = iron.GeneratedMeshTypes.REGULAR
@@ -131,12 +113,14 @@ generatedMesh.numberOfElements = [numberGlobalXElements,numberGlobalYElements,nu
 #DOC-END generated mesh
 
 #DOC-START mesh
+meshUserNumber = 1
 mesh = iron.Mesh()
 generatedMesh.CreateFinish(meshUserNumber,mesh)
 #DOC-END mesh
 
 # Create a decomposition for the mesh
 #DOC-START decomposition
+decompositionUserNumber = 1
 decomposition = iron.Decomposition()
 decomposition.CreateStart(decompositionUserNumber,mesh)
 decomposition.type = iron.DecompositionTypes.CALCULATED
@@ -146,12 +130,13 @@ decomposition.CreateFinish()
 
 # Create a field for the geometry
 #DOC-START geometry
+geometricFieldUserNumber = 1
 geometricField = iron.Field()
 geometricField.CreateStart(geometricFieldUserNumber,region)
 geometricField.meshDecomposition = decomposition
-geometricField.ComponentMeshComponentSet(CMISS.FieldVariableTypes.U,1,1)
-geometricField.ComponentMeshComponentSet(CMISS.FieldVariableTypes.U,2,1)
-geometricField.ComponentMeshComponentSet(CMISS.FieldVariableTypes.U,3,1)
+geometricField.ComponentMeshComponentSet(CMISS.FieldVariableTypes.U,1,meshComponentNumber)
+geometricField.ComponentMeshComponentSet(CMISS.FieldVariableTypes.U,2,meshComponentNumber)
+geometricField.ComponentMeshComponentSet(CMISS.FieldVariableTypes.U,3,meshComponentNumber)
 geometricField.CreateFinish()
 #DOC-END geometry
 
@@ -162,11 +147,13 @@ generatedMesh.GeometricParametersCalculate(geometricField)
 
 # Create standard Laplace equations set
 #DOC-START equationset
+equationsSetUserNumber = 1
+equationsSetFieldUserNumber = 2
 equationsSetField = iron.Field()
 equationsSet = iron.EquationsSet()
 equationsSetSpecification = [iron.EquationsSetClasses.CLASSICAL_FIELD,
-                             iron.EquationsSetTypes.LAPLACE_EQUATION,
-                             iron.EquationsSetSubtypes.STANDARD_LAPLACE]
+    iron.EquationsSetTypes.LAPLACE_EQUATION,
+    iron.EquationsSetSubtypes.STANDARD_LAPLACE]
 equationsSet.CreateStart(equationsSetUserNumber,region,geometricField,
     equationsSetSpecification,equationsSetFieldUserNumber,equationsSetField)
 equationsSet.CreateFinish()
@@ -174,9 +161,11 @@ equationsSet.CreateFinish()
 
 # Create dependent field
 #DOC-START dependent
+dependentFieldUserNumber = 3
 dependentField = iron.Field()
 equationsSet.DependentCreateStart(dependentFieldUserNumber,dependentField)
 dependentField.DOFOrderTypeSet(iron.FieldVariableTypes.U,iron.FieldDOFOrderTypes.SEPARATED)
+dependentField.DOFOrderTypeSet(iron.FieldVariableTypes.DELUDELN,iron.FieldDOFOrderTypes.SEPARATED)
 equationsSet.DependentCreateFinish()
 #DOC-END dependent
 
@@ -184,9 +173,8 @@ equationsSet.DependentCreateFinish()
 #DOC-START dependent1
 componentNumber = 1
 initialValue = 0.5
-dependentField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,
-                                           iron.FieldParameterSetTypes.VALUES,
-                                           componentNumber,initialValue)
+dependentField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES,
+    componentNumber,initialValue)
 #DOC-END dependent1
 
 # Create equations
@@ -200,10 +188,11 @@ equationsSet.EquationsCreateFinish()
 
 # Create Laplace problem
 #DOC-START problem
+problemUserNumber = 1
 problem = iron.Problem()
 problemSpecification = [iron.ProblemClasses.CLASSICAL_FIELD,
-                        iron.ProblemTypes.LAPLACE_EQUATION,
-                        iron.ProblemSubtypes.STANDARD_LAPLACE]
+    iron.ProblemTypes.LAPLACE_EQUATION,
+    iron.ProblemSubtypes.STANDARD_LAPLACE]
 problem.CreateStart(problemUserNumber, problemSpecification)
 problem.CreateFinish()
 #DOC-END problem
@@ -242,7 +231,7 @@ problem.SolverEquationsCreateFinish()
 #DOC-START BC
 boundaryConditions = iron.BoundaryConditions()
 solverEquations.BoundaryConditionsCreateStart(boundaryConditions)
-firstNodeNumber=1
+firstNodeNumber = 1
 nodes = iron.Nodes()
 region.NodesGet(nodes)
 lastNodeNumber = nodes.numberOfNodes
@@ -250,10 +239,10 @@ firstNodeDomain = decomposition.NodeDomainGet(firstNodeNumber,1)
 lastNodeDomain = decomposition.NodeDomainGet(lastNodeNumber,1)
 if firstNodeDomain == computationalNodeNumber:
     boundaryConditions.SetNode(dependentField,iron.FieldVariableTypes.U,
-                               1,1,firstNodeNumber,1,iron.BoundaryConditionsTypes.FIXED,0.0)
+     1,1,firstNodeNumber,1,iron.BoundaryConditionsTypes.FIXED,0.0)
 if lastNodeDomain == computationalNodeNumber:
     boundaryConditions.SetNode(dependentField,iron.FieldVariableTypes.U,
-                               1,1,lastNodeNumber,1,iron.BoundaryConditionsTypes.FIXED,1.0)
+     1,1,lastNodeNumber,1,iron.BoundaryConditionsTypes.FIXED,1.0)
 solverEquations.BoundaryConditionsCreateFinish()
 #DOC-END BC
 

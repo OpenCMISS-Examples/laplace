@@ -10,9 +10,19 @@ What You Need
 
 You need to install Python and the OpenCMISS library as described elsewhere.
 
-You require the following file. Right-click on this link and download the text file to your machine:
+The Python code given here follows the `Python Laplace example`_ found in the OpenCMISS examples repository.
 
- * :download:`Laplace Example script <Python/LaplaceExample.py>`
+------------------------------------
+Setting Up the Environment Variables
+------------------------------------
+
+Environment variables control the programmer setup options. If we are using the bash shell, setting up the environment variables can be done by running the following command from console::
+
+  . ~/.bashrc
+
+And if we are using the c shell::
+
+  . ~/.cshrc
 
 ---------------
 Getting Started
@@ -109,7 +119,7 @@ In order to define a simple 3D geometry for our problem we can use one of OpenCM
   :start-after: #DOC-START generated mesh
   :end-before: #DOC-END generated mesh
 
-When setting the ``basis`` property, we assign a list of bases as we might want to construct a mesh with multiple components using different interpolation schemes.
+When setting the ``basis`` property, we assign a list of bases as we might want to construct a mesh with multiple components using different interpolation schemes. In this example we only have one mesh component.
 
 The generated mesh is not itself a mesh, but is used to create a mesh. We construct the `mesh` when we call the ``CreateFinish`` method of the generated mesh and pass in the mesh to generate:
 
@@ -140,6 +150,8 @@ Now that we have a decomposed mesh, we can begin defining the `fields` we need o
   :start-after: #DOC-START geometry
   :end-before: #DOC-END geometry
 
+The call to the ``ComponentMeshComponentSet`` method is not actually required here as all field components will default to use the first mesh component that we created with ``generatedMesh.CreateStart`` method, but if we have defined a mesh that has multiple components (that use different interpolation schemes) then different field components can use different mesh components. For example, in a finite elasticity problem we could define our geometry using quadratic Lagrange interpolation, and the hydrostatic pressure using linear Lagrange interpolation.
+
 We have created a field but all the field component values are currently set to zero. We can define the geometry using the generated mesh we created earlier:
 
 .. literalinclude:: Python/LaplaceExample.py
@@ -167,7 +179,7 @@ Now we use our equations set to create a dependent field. This stores the soluti
 
 We haven't used the ``Field.CreateStart`` method to construct the dependent field but have had it automatically constructed by the equations set.
 
-We can initialise our solution with a value we think will be close to the final solution. A field in OpenCMISS can contain multiple `field variables`, and each field variable can have multiple `components`. For the standard Laplace equation, the dependent field only has a ``U`` variable which has one component. Field variables can also have different field `parameter sets`, for example we can store values at a previous time step in dynamic problems. In this example we are only interested in the ``VALUES`` parameter set:
+We can initialise our solution with a value we think will be close to the final solution. A field in OpenCMISS can contain multiple `field variables`, and each field variable can have multiple `components`. For the standard Laplace equation, the dependent field has ``U`` (standard variable type i.e., u) and ``DELUDELN`` (normal derivative variable type i.e., du/dn) variables which both have one component. Field variables can also have different field `parameter sets`, for example we can store values at a previous time step in dynamic problems. In this example we are only interested in the ``VALUES`` parameter set:
 
 .. literalinclude:: Python/LaplaceExample.py
   :linenos:
@@ -275,22 +287,58 @@ Once the problem has been solved, the dependent field contains the solution to o
   :start-after: #DOC-START Export
   :end-before: #DOC-END Export
 
-==================
-Running the Script
-==================
+===========================
+Running the Script in Linux
+===========================
 
 The Python code given here follows the `Python Laplace example`_ found in the OpenCMISS examples repository. Now we would like to run this script to check that we get the correct output from OpenCMISS. In each case you must change directory to where you downloaded the Python script and data file, then run the script with ``python``. The exact names of the directories may not match what is on your own computer, so you will need to change them as appropriate. Follow the instructions that are applicable for your platform.
 
-.. _Python Laplace example: https://github.com/OpenCMISS/examples/blob/master/ClassicalField/Laplace/Laplace/Python/LaplaceExample.py
-
------
-Linux
------
+.. _Python Laplace example: https://github.com/OpenCMISS-Examples/laplace/blob/master/Python/LaplaceExample.py
+                            
+------
+Serial
+------
 
 From console::
 
-  cd downloads
   python LaplaceExample.py
+
+--------
+Parallel
+--------
+
+From console::
+
+  cd ~/.
+  touch .mpd.conf
+
+Edit .mpd.conf and add::
+
+  MPD_SECRETWORD=<your secret word>
+
+DO NOT use your password for your secret word. Now::
+
+  chmod 600 .mpd.conf
+
+Now edit a file called hostfile.list and add the following lines (one line per processor)::
+
+  hpc3.bioeng.auckland.ac.nz
+
+Finally add the following to your login script. For bash::
+
+  export MP_HOSTFILE=<path to your hostfile.list file> 
+
+For cshell::
+
+  setenv MP_HOSTFILE <path to your hostfile.list file> 
+
+Run a MPI example using mpiexec::
+
+  cd ${OPENCMISS_ROOT}/ClassicalField/Laplace/Laplace/Python
+  mpd &
+  mpiexec.mpd –n 2 python LaplaceExample.py
+
+To see what is happening get another terminal up on hpc3 and type top.
 
 ======
 Output
