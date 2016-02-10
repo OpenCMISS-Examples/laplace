@@ -2,7 +2,7 @@
 
 #> \file
 #> \author Chris Bradley
-#> \brief This is an example script to solve a Laplace problem using openCMISS calls in python.
+#> \brief This is an example script to solve a Laplace problem using OpenCMISS calls in python.
 #>
 #> \section LICENSE
 #>
@@ -18,7 +18,7 @@
 #> License for the specific language governing rights and limitations
 #> under the License.
 #>
-#> The Original Code is openCMISS
+#> The Original Code is OpenCMISS
 #>
 #> The Initial Developer of the Original Code is University of Auckland,
 #> Auckland, New Zealand and University of Oxford, Oxford, United
@@ -39,189 +39,230 @@
 #> and other provisions required by the GPL or the LGPL. if you do not delete
 #> the provisions above, a recipient may use your version of this file under
 #> the terms of any one of the MPL, the GPL or the LGPL.
-#>
-
-#> \example ClassicalField/Laplace/LaplacePy/LaplaceExample.py
-## Example script to solve a Laplace problem using openCMISS calls in python.
-## \par Latest Builds:
-## \li <a href='http://autotest.bioeng.auckland.ac.nz/opencmiss-build/logs_x86_64-linux/ClassicalField/Laplace/LaplacePy/build-intel'>Linux Intel Build</a>
-## \li <a href='http://autotest.bioeng.auckland.ac.nz/opencmiss-build/logs_x86_64-linux/ClassicalField/Laplace/LaplacePy/build-gnu'>Linux GNU Build</a>
-#<
-
 
 # Add Python bindings directory to PATH
 import sys, os
 sys.path.append(os.sep.join((os.environ['OPENCMISS_ROOT'],'cm','bindings','python')))
 
-# Intialise OpenCMISS
-from opencmiss import CMISS
+# Intialise OpenCMISS start
+from opencmiss import iron
+# Intialise OpenCMISS end
 
-# Set problem parameters
+iron.DiagnosticsSetOn(iron.DiagnosticTypes.IN,[1,2,3,4,5],"Diagnostics",["DOMAIN_MAPPINGS_LOCAL_FROM_GLOBAL_CALCULATE"])
+
+# Get the computational nodes information
+#DOC-START computationalNode
+numberOfComputationalNodes = iron.ComputationalNumberOfNodesGet()
+computationalNodeNumber = iron.ComputationalNodeNumberGet()
+#DOC-END computationalNode
+
+# Creation a RC coordinate system
+#DOC-START coordinate1
+coordinateSystem = iron.CoordinateSystem()
+#DOC-END coordinate1
+#DOC-START coordinate2
+coordinateSystemUserNumber = 1
+coordinateSystem.CreateStart(coordinateSystemUserNumber)
+#DOC-END coordinate2
+#DOC-START coordinate3
+coordinateSystem.dimension = 3
+#DOC-END coordinate3
+#DOC-START coordinate4
+coordinateSystem.CreateFinish()
+#DOC-END coordinate4
+
+# Create a region
+#DOC-START region
+regionUserNumber = 1
+region = iron.Region()
+region.CreateStart(regionUserNumber,iron.WorldRegion)
+region.label = "LaplaceRegion"
+region.coordinateSystem = coordinateSystem
+region.CreateFinish()
+#DOC-END region
+
+# Create a tri-linear lagrange basis
+#DOC-START basis
+basisUserNumber = 1
+basis = iron.Basis()
+basis.CreateStart(basisUserNumber)
+basis.type = iron.BasisTypes.LAGRANGE_HERMITE_TP
+basis.numberOfXi = 3
+basis.interpolationXi = [iron.BasisInterpolationSpecifications.LINEAR_LAGRANGE]*3
+basis.quadratureNumberOfGaussXi = [2]*3
+basis.CreateFinish()
+#DOC-END basis
+
+# Create a generated mesh
+#DOC-START generated mesh
 height = 1.0
-width = 2.0
+width  = 2.0
 length = 3.0
-
-(coordinateSystemUserNumber,
-    regionUserNumber,
-    basisUserNumber,
-    generatedMeshUserNumber,
-    meshUserNumber,
-    decompositionUserNumber,
-    geometricFieldUserNumber,
-    equationsSetFieldUserNumber,
-    dependentFieldUserNumber,
-    equationsSetUserNumber,
-    problemUserNumber) = range(1,12)
-
 numberGlobalXElements = 5
 numberGlobalYElements = 5
 numberGlobalZElements = 5
 
-CMISS.DiagnosticsSetOn(CMISS.DiagnosticTypes.IN,[1,2,3,4,5],"Diagnostics",["DOMAIN_MAPPINGS_LOCAL_FROM_GLOBAL_CALCULATE"])
-
-# Get the computational nodes information
-numberOfComputationalNodes = CMISS.ComputationalNumberOfNodesGet()
-computationalNodeNumber = CMISS.ComputationalNodeNumberGet()
-
-# Creation a RC coordinate system
-coordinateSystem = CMISS.CoordinateSystem()
-coordinateSystem.CreateStart(coordinateSystemUserNumber)
-coordinateSystem.dimension = 3
-coordinateSystem.CreateFinish()
-
-# Create a region
-region = CMISS.Region()
-region.CreateStart(regionUserNumber,CMISS.WorldRegion)
-region.label = "LaplaceRegion"
-region.coordinateSystem = coordinateSystem
-region.CreateFinish()
-
-# Create a tri-linear lagrange basis
-basis = CMISS.Basis()
-basis.CreateStart(basisUserNumber)
-basis.type = CMISS.BasisTypes.LAGRANGE_HERMITE_TP
-basis.numberOfXi = 3
-basis.interpolationXi = [CMISS.BasisInterpolationSpecifications.LINEAR_LAGRANGE]*3
-basis.quadratureNumberOfGaussXi = [2]*3
-basis.CreateFinish()
-
-# Create a generated mesh
-generatedMesh = CMISS.GeneratedMesh()
+meshComponentNumber = 1
+generatedMeshUserNumber = 1
+generatedMesh = iron.GeneratedMesh()
 generatedMesh.CreateStart(generatedMeshUserNumber,region)
-generatedMesh.type = CMISS.GeneratedMeshTypes.REGULAR
+generatedMesh.type = iron.GeneratedMeshTypes.REGULAR
 generatedMesh.basis = [basis]
 generatedMesh.extent = [width,height,length]
 generatedMesh.numberOfElements = [numberGlobalXElements,numberGlobalYElements,numberGlobalZElements]
+#DOC-END generated mesh
 
-mesh = CMISS.Mesh()
+#DOC-START mesh
+meshUserNumber = 1
+mesh = iron.Mesh()
 generatedMesh.CreateFinish(meshUserNumber,mesh)
+#DOC-END mesh
 
 # Create a decomposition for the mesh
-decomposition = CMISS.Decomposition()
+#DOC-START decomposition
+decompositionUserNumber = 1
+decomposition = iron.Decomposition()
 decomposition.CreateStart(decompositionUserNumber,mesh)
-decomposition.type = CMISS.DecompositionTypes.CALCULATED
+decomposition.type = iron.DecompositionTypes.CALCULATED
 decomposition.numberOfDomains = numberOfComputationalNodes
 decomposition.CreateFinish()
+#DOC-END decomposition
 
 # Create a field for the geometry
-geometricField = CMISS.Field()
+#DOC-START geometry
+geometricFieldUserNumber = 1
+geometricField = iron.Field()
 geometricField.CreateStart(geometricFieldUserNumber,region)
 geometricField.meshDecomposition = decomposition
-geometricField.ComponentMeshComponentSet(CMISS.FieldVariableTypes.U,1,1)
-geometricField.ComponentMeshComponentSet(CMISS.FieldVariableTypes.U,2,1)
-geometricField.ComponentMeshComponentSet(CMISS.FieldVariableTypes.U,3,1)
+geometricField.ComponentMeshComponentSet(CMISS.FieldVariableTypes.U,1,meshComponentNumber)
+geometricField.ComponentMeshComponentSet(CMISS.FieldVariableTypes.U,2,meshComponentNumber)
+geometricField.ComponentMeshComponentSet(CMISS.FieldVariableTypes.U,3,meshComponentNumber)
 geometricField.CreateFinish()
+#DOC-END geometry
 
 # Set geometry from the generated mesh
+#DOC-START geometry1
 generatedMesh.GeometricParametersCalculate(geometricField)
+#DOC-END geometry2
 
 # Create standard Laplace equations set
-equationsSetField = CMISS.Field()
-equationsSet = CMISS.EquationsSet()
+#DOC-START equationset
+equationsSetUserNumber = 1
+equationsSetFieldUserNumber = 2
+equationsSetField = iron.Field()
+equationsSet = iron.EquationsSet()
+equationsSetSpecification = [iron.EquationsSetClasses.CLASSICAL_FIELD,
+    iron.EquationsSetTypes.LAPLACE_EQUATION,
+    iron.EquationsSetSubtypes.STANDARD_LAPLACE]
 equationsSet.CreateStart(equationsSetUserNumber,region,geometricField,
-        CMISS.EquationsSetClasses.CLASSICAL_FIELD,
-        CMISS.EquationsSetTypes.LAPLACE_EQUATION,
-        CMISS.EquationsSetSubtypes.STANDARD_LAPLACE,
-        equationsSetFieldUserNumber, equationsSetField)
+    equationsSetSpecification,equationsSetFieldUserNumber,equationsSetField)
 equationsSet.CreateFinish()
+#DOC-END equationset
 
 # Create dependent field
-dependentField = CMISS.Field()
+#DOC-START dependent
+dependentFieldUserNumber = 3
+dependentField = iron.Field()
 equationsSet.DependentCreateStart(dependentFieldUserNumber,dependentField)
-dependentField.DOFOrderTypeSet(CMISS.FieldVariableTypes.U,CMISS.FieldDOFOrderTypes.SEPARATED)
-dependentField.DOFOrderTypeSet(CMISS.FieldVariableTypes.DELUDELN,CMISS.FieldDOFOrderTypes.SEPARATED)
+dependentField.DOFOrderTypeSet(iron.FieldVariableTypes.U,iron.FieldDOFOrderTypes.SEPARATED)
+dependentField.DOFOrderTypeSet(iron.FieldVariableTypes.DELUDELN,iron.FieldDOFOrderTypes.SEPARATED)
 equationsSet.DependentCreateFinish()
+#DOC-END dependent
 
 # Initialise dependent field
-dependentField.ComponentValuesInitialiseDP(CMISS.FieldVariableTypes.U,CMISS.FieldParameterSetTypes.VALUES,1,0.5)
+#DOC-START dependent1
+componentNumber = 1
+initialValue = 0.5
+dependentField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES,
+    componentNumber,initialValue)
+#DOC-END dependent1
 
 # Create equations
-equations = CMISS.Equations()
+#DOC-START set
+equations = iron.Equations()
 equationsSet.EquationsCreateStart(equations)
-equations.sparsityType = CMISS.EquationsSparsityTypes.SPARSE
-equations.outputType = CMISS.EquationsOutputTypes.NONE
+equations.sparsityType = iron.EquationsSparsityTypes.SPARSE
+equations.outputType = iron.EquationsOutputTypes.NONE
 equationsSet.EquationsCreateFinish()
+#DOC-END set
 
 # Create Laplace problem
-problem = CMISS.Problem()
-problem.CreateStart(problemUserNumber)
-problem.SpecificationSet(CMISS.ProblemClasses.CLASSICAL_FIELD,
-        CMISS.ProblemTypes.LAPLACE_EQUATION,
-        CMISS.ProblemSubTypes.STANDARD_LAPLACE)
+#DOC-START problem
+problemUserNumber = 1
+problem = iron.Problem()
+problemSpecification = [iron.ProblemClasses.CLASSICAL_FIELD,
+    iron.ProblemTypes.LAPLACE_EQUATION,
+    iron.ProblemSubtypes.STANDARD_LAPLACE]
+problem.CreateStart(problemUserNumber, problemSpecification)
 problem.CreateFinish()
+#DOC-END problem
 
 # Create control loops
+#DOC-START loops
 problem.ControlLoopCreateStart()
 problem.ControlLoopCreateFinish()
+#DOC-END loops
 
 # Create problem solver
-solver = CMISS.Solver()
+#DOC-START problem solver
+solver = iron.Solver()
 problem.SolversCreateStart()
-problem.SolverGet([CMISS.ControlLoopIdentifiers.NODE],1,solver)
-solver.outputType = CMISS.SolverOutputTypes.SOLVER
-solver.linearType = CMISS.LinearSolverTypes.ITERATIVE
+problem.SolverGet([iron.ControlLoopIdentifiers.NODE],1,solver)
+solver.outputType = iron.SolverOutputTypes.SOLVER
+solver.linearType = iron.LinearSolverTypes.ITERATIVE
 solver.linearIterativeAbsoluteTolerance = 1.0E-12
 solver.linearIterativeRelativeTolerance = 1.0E-12
 problem.SolversCreateFinish()
+#DOC-END problem solver
 
 # Create solver equations and add equations set to solver equations
-solver = CMISS.Solver()
-solverEquations = CMISS.SolverEquations()
+#DOC-START solver equations
+solver = iron.Solver()
+solverEquations = iron.SolverEquations()
 problem.SolverEquationsCreateStart()
-problem.SolverGet([CMISS.ControlLoopIdentifiers.NODE],1,solver)
+problem.SolverGet([iron.ControlLoopIdentifiers.NODE],1,solver)
 solver.SolverEquationsGet(solverEquations)
-solverEquations.sparsityType = CMISS.SolverEquationsSparsityTypes.SPARSE
+solverEquations.sparsityType = iron.SolverEquationsSparsityTypes.SPARSE
 equationsSetIndex = solverEquations.EquationsSetAdd(equationsSet)
 problem.SolverEquationsCreateFinish()
+#DOC-END solver equations
 
 # Create boundary conditions and set first and last nodes to 0.0 and 1.0
-boundaryConditions = CMISS.BoundaryConditions()
+#DOC-START BC
+boundaryConditions = iron.BoundaryConditions()
 solverEquations.BoundaryConditionsCreateStart(boundaryConditions)
-firstNodeNumber=1
-nodes = CMISS.Nodes()
+firstNodeNumber = 1
+nodes = iron.Nodes()
 region.NodesGet(nodes)
 lastNodeNumber = nodes.numberOfNodes
 firstNodeDomain = decomposition.NodeDomainGet(firstNodeNumber,1)
 lastNodeDomain = decomposition.NodeDomainGet(lastNodeNumber,1)
 if firstNodeDomain == computationalNodeNumber:
-    boundaryConditions.SetNode(dependentField,CMISS.FieldVariableTypes.U,1,1,firstNodeNumber,1,CMISS.BoundaryConditionsTypes.FIXED,0.0)
+    boundaryConditions.SetNode(dependentField,iron.FieldVariableTypes.U,
+     1,1,firstNodeNumber,1,iron.BoundaryConditionsTypes.FIXED,0.0)
 if lastNodeDomain == computationalNodeNumber:
-    boundaryConditions.SetNode(dependentField,CMISS.FieldVariableTypes.U,1,1,lastNodeNumber,1,CMISS.BoundaryConditionsTypes.FIXED,1.0)
+    boundaryConditions.SetNode(dependentField,iron.FieldVariableTypes.U,
+     1,1,lastNodeNumber,1,iron.BoundaryConditionsTypes.FIXED,1.0)
 solverEquations.BoundaryConditionsCreateFinish()
+#DOC-END BC
 
 # Solve the problem
+#DOC-START Solve
 problem.Solve()
+#DOC-END Solve
 
 # Export results
+#DOC-START Export
 baseName = "laplace"
 dataFormat = "PLAIN_TEXT"
-fml = CMISS.FieldMLIO()
+fml = iron.FieldMLIO()
 fml.OutputCreate(mesh, "", baseName, dataFormat)
 fml.OutputAddFieldNoType(baseName+".geometric", dataFormat, geometricField,
-    CMISS.FieldVariableTypes.U, CMISS.FieldParameterSetTypes.VALUES)
+    iron.FieldVariableTypes.U, iron.FieldParameterSetTypes.VALUES)
 fml.OutputAddFieldNoType(baseName+".phi", dataFormat, dependentField,
-    CMISS.FieldVariableTypes.U, CMISS.FieldParameterSetTypes.VALUES)
+    iron.FieldVariableTypes.U, iron.FieldParameterSetTypes.VALUES)
 fml.OutputWrite("LaplaceExample.xml")
 fml.Finalise()
+#DOC-END Export
 
-CMISS.Finalise()
+iron.Finalise()
