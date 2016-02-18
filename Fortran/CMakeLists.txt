@@ -1,6 +1,16 @@
 # Add example executable
 add_executable(laplace_fortran src/FortranExample.f90)
 
+# Turn on Fortran preprocessing (#include directives)
+if (MSVC)
+    set(PROC_OPT "/fpp")
+else()
+    set(PROC_OPT "-cpp")
+endif()
+target_compile_options(laplace_fortran PRIVATE ${PROC_OPT})
+
+
+
 # Link to opencmiss
 # -----------------
 #
