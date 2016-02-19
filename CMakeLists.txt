@@ -25,7 +25,7 @@ enable_testing()
 # This function creates a link target 'opencmiss' that contains references to the requested OpenCMISS components.
 # For Iron, it also adds the necessary MPI information - no further find_package(MPI ..) and setting of extra include
 # paths needed!               
-find_package(OpenCMISS 1.1 REQUIRED COMPONENTS Iron)
+find_package(OpenCMISS 1.1 REQUIRED COMPONENTS Iron CONFIG)
 
 # CMake application code
 # ----------------------

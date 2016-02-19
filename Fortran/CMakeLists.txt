@@ -9,8 +9,6 @@ else()
 endif()
 target_compile_options(laplace_fortran PRIVATE ${PROC_OPT})
 
-
-
 # Link to opencmiss
 # -----------------
 #
@@ -29,7 +27,7 @@ target_compile_options(laplace_fortran PRIVATE ${PROC_OPT})
 target_link_libraries(laplace_fortran PRIVATE opencmiss)
 
 # Add a simple test that runs the executable
-add_test(Laplace_Fortran laplace_fortran)
+add_test(NAME Laplace_Fortran COMMAND laplace_fortran)
 add_opencmiss_environment(Laplace_Fortran)
 
 ###################
