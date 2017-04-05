@@ -24,11 +24,13 @@ target_compile_options(laplace_fortran PRIVATE ${PROC_OPT})
 #     target_link_libraries(${EXAMPLE_BINARY} PRIVATE petsc)
 #
 # All the OpenCMISS dependencies provide a target you can link against corresponding to the (lowercase) component name.
-target_link_libraries(laplace_fortran PRIVATE opencmiss)
+target_link_libraries(laplace_fortran PRIVATE "/home/ssaf006/OpenCMISS/install/lib/libiron.so")
+target_include_directories(laplace_fortran PRIVATE "/home/ssaf006/OpenCMISS/install/include/opencmiss" "/usr/include/mpich")
+#target_link_libraries(laplace_fortran PRIVATE iron/opencmisslibs)
 
 # Add a simple test that runs the executable
 add_test(NAME Laplace_Fortran COMMAND laplace_fortran)
-add_opencmiss_environment(Laplace_Fortran)
+#add_opencmiss_environment(Laplace_Fortran)
 
 ###################
 # Developer notice!

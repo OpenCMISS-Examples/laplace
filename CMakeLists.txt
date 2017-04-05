@@ -6,7 +6,7 @@
 # For more information see http://www.opencmiss.org/documentation
 
 # Include the OpenCMISS initalisation & macro definition file.
-include(./OpenCMISS.cmake)
+#include(./OpenCMISS.cmake)
 
 # Project setup
 # -------------
@@ -25,11 +25,11 @@ enable_testing()
 # This function creates a link target 'opencmiss' that contains references to the requested OpenCMISS components.
 # For Iron, it also adds the necessary MPI information - no further find_package(MPI ..) and setting of extra include
 # paths needed!               
-find_package(OpenCMISS 1.1 REQUIRED COMPONENTS Iron CONFIG)
+#find_package(OpenCMISSLibs 1.3.0 REQUIRED COMPONENTS Iron CONFIG)
 
 # CMake application code
 # ----------------------
-add_subdirectory(C)
+#add_subdirectory(C)
 if (CMAKE_Fortran_COMPILER)
     add_subdirectory(Fortran)
 endif()
