@@ -17,7 +17,7 @@ target_compile_options(laplace_fortran PRIVATE ${PROC_OPT})
 # Alternatively, you can also directly invoke 'find_package(Iron <IRON_VERSION>)' to explicitly
 # require that version.  If you do this you will also need to change the target link library from
 # 'opencmisslibs' to 'iron'. 
-target_link_libraries(laplace_fortran PRIVATE opencmisslibs)
+target_link_libraries(laplace_fortran PRIVATE opencmisslibs mpi)
 
 # Add a simple test that runs the executable
 add_test(NAME Laplace_Fortran COMMAND laplace_fortran)

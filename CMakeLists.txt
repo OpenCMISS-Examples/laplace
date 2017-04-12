@@ -22,14 +22,14 @@ enable_testing()
 # This function creates a link target 'opencmisslibs' that contains references to the requested OpenCMISS components.
 # For Iron, it also adds the necessary MPI information - no further find_package(MPI ..) and setting of extra include
 # paths needed!
-# If you do have a particular MPI in mind set the variable 'MPI' to mpich, openmpi, msmpi, etc.
+# If you have a particular MPI in mind set the variable 'MPI' to mpich, openmpi, msmpi, etc.
 find_package(OpenCMISSLibs 1.3.0 REQUIRED COMPONENTS Iron CONFIG)
 include(OCMiscFunctions)
 
 # CMake application code
 # ----------------------
 add_subdirectory(C)
-if (CMAKE_Fortran_COMPILER)
+if (CMAKE_Fortran_COMPILER_WORKS)
     add_subdirectory(Fortran)
 endif()
 
