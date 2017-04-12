@@ -5,9 +5,6 @@
 # The OpenCMISS project website can be found at http://www.opencmiss.org
 # For more information see http://www.opencmiss.org/documentation
 
-# Include the OpenCMISS initalisation & macro definition file.
-include(./OpenCMISS.cmake)
-
 # Project setup
 # -------------
 cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
@@ -15,17 +12,19 @@ project(OpenCMISS-Example VERSION 1.0 LANGUAGES C)
 enable_language(Fortran OPTIONAL)
 enable_testing()
 
-# Find OpenCMISS
-# --------------
+# Find OpenCMISSLibs
+# ------------------
 #
-# This call tries to find a matching OpenCMISS (SDK) installation for your (default) Toolchain and MPI choice. 
-# Currently available OpenCMISS package components: Iron Zinc
+# This call tries to find a matching OpenCMISS library (SDK) installation for your (default) Toolchain and MPI choice. 
+# Currently available OpenCMISS library package components: Iron Zinc
 # Requiring Iron will also include the iron_c bindings target if available.
 #
-# This function creates a link target 'opencmiss' that contains references to the requested OpenCMISS components.
+# This function creates a link target 'opencmisslibs' that contains references to the requested OpenCMISS components.
 # For Iron, it also adds the necessary MPI information - no further find_package(MPI ..) and setting of extra include
-# paths needed!               
-find_package(OpenCMISS 1.1 REQUIRED COMPONENTS Iron CONFIG)
+# paths needed!
+# If you do have a particular MPI in mind set the variable 'MPI' to mpich, openmpi, msmpi, etc.
+find_package(OpenCMISSLibs 1.3.0 REQUIRED COMPONENTS Iron CONFIG)
+include(OCMiscFunctions)
 
 # CMake application code
 # ----------------------
@@ -33,3 +32,4 @@ add_subdirectory(C)
 if (CMAKE_Fortran_COMPILER)
     add_subdirectory(Fortran)
 endif()
+
