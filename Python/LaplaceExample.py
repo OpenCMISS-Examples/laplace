@@ -77,7 +77,7 @@ numberGlobalXElements = 5
 numberGlobalYElements = 5
 numberGlobalZElements = 5
 
-iron.DiagnosticsSetOn(iron.DiagnosticTypes.IN,[1,2,3,4,5],"Diagnostics",["DOMAIN_MAPPINGS_LOCAL_FROM_GLOBAL_CALCULATE"])
+#iron.DiagnosticsSetOn(iron.DiagnosticTypes.IN,[1,2,3,4,5],"Diagnostics",["DOMAIN_MAPPINGS_LOCAL_FROM_GLOBAL_CALCULATE"])
 
 # Get the computational nodes information
 numberOfComputationalNodes = iron.ComputationalNumberOfNodesGet()

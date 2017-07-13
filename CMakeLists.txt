@@ -8,7 +8,7 @@
 # Project setup
 # -------------
 cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
-project(OpenCMISS-Example VERSION 1.0 LANGUAGES C)
+project(ClassicalField-Laplace VERSION 1.0 LANGUAGES C)
 enable_language(Fortran OPTIONAL)
 enable_testing()
 
