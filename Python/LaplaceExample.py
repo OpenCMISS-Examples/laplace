@@ -52,8 +52,9 @@
 # Add Python bindings directory to PATH
 import sys, os
 
-# Intialise OpenCMISS-Iron
+# Intialise OpenCMISS-Iron start
 from opencmiss.iron import iron
+# Intialise OpenCMISS-Iron stop
 
 # Set problem parameters
 height = 1.0

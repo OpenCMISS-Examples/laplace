@@ -1,49 +1,35 @@
-=====================================
-Laplace - Using OpenCMISS from Python
-=====================================
+==========================================
+Laplace - Using OpenCMISS-Iron from Python
+==========================================
 
-In this tutorial we will walk through how to solve Laplace's equation on a 3D geometry using the Python bindings to OpenCMISS.
+In this tutorial we will walk through how to solve Laplace's equation on a 3D geometry using the Python bindings to OpenCMISS-Iron.
 
 -------------
 What You Need
 -------------
 
-You need to install Python and the OpenCMISS library as described elsewhere.
-
-The Python code given here follows the `Python Laplace example`_ found in the OpenCMISS examples repository.
-
-------------------------------------
-Setting Up the Environment Variables
-------------------------------------
-
-Environment variables control the programmer setup options. If we are using the bash shell, setting up the environment variables can be done by running the following command from console::
-
-  . ~/.bashrc
-
-And if we are using the c shell::
-
-  . ~/.cshrc
+You need to install Python and the OpenCMISS-Iron library as described elsewhere.
 
 ---------------
 Getting Started
 ---------------
 
-In order to use OpenCMISS we have to first import the ``CMISS`` module from the ``opencmiss`` package:
+In order to use OpenCMISS-Iron we have to first import the ``iron`` module from the ``opencmiss.iron`` package:
 
 .. literalinclude:: Python/LaplaceExample.py
   :linenos:
-  :start-after: # Intialise OpenCMISS start
-  :end-before: # Intialise OpenCMISS end
+  :start-after: # Intialise OpenCMISS-Iron start
+  :end-before: # Intialise OpenCMISS-Iron end
 
-Assuming OpenCMISS has been correctly built with the Python bindings by following the instructions in the `programmer documentation`_, we can now access all the OpenCMISS functions, classes and constants under the ``CMISS`` namespace.
+Assuming OpenCMISS-Iron has been correctly built with the Python bindings by following the instructions in the `programmer documentation`_, we can now access all the OpenCMISS-Iron functions, classes and constants under the ``iron`` namespace.
 
-.. _programmer documentation: http://cmiss.bioeng.auckland.ac.nz/OpenCMISS/doc/programmer/
+.. _programmer documentation: http://opencmiss.org/developers.html
 
 -------------------------------------------
 Getting the Computational Nodes Information
 -------------------------------------------
 
-OpenCMISS is designed to solve problems on distributed parallel computers. It divides the problem (`decomposes` it) into smaller parts that each run on separate machines/processes, termed `computational nodes`, which solve their part and intercommunicate to solve the whole problem. We can get the computational nodes number as below:
+OpenCMISS-Iron is designed to solve problems on distributed parallel computers. It divides the problem (`decomposes` it) into smaller parts that each run on separate machines/processes, termed `computational nodes`, which solve their part and intercommunicate to solve the whole problem. We can get the computational nodes number as below:
 
 .. literalinclude:: Python/LaplaceExample.py
   :linenos:
@@ -56,14 +42,14 @@ Creating a Coordinate System
 
 First we construct a `coordinate system` that will be used to describe the geometry in our problem. The 3D geometry will exist in a 3D space, so we need a 3D coordinate system.
 
-When creating an object in OpenCMISS there are at least three steps. First we initialise the object:
+When creating an object in OpenCMISS-Iron there are at least three steps. First we initialise the object:
 
 .. literalinclude:: Python/LaplaceExample.py
   :linenos:
   :start-after: #DOC-START coordinate1
   :end-before: #DOC-END coordinate1
 
-This creates a thin wrapper that just points to the actual coordinate system used internally by OpenCMISS, and initially the pointer is null. Trying to use the coordinate system now would raise an exception. To actually construct a coordinate system we call the ``CreateStart`` method and pass it a user number. The user number must be unique between objects of the same type and can be used to identify the coordinate system later. Most OpenCMISS classes require a user number when creating them, and many also require additional parameters to the ``CreateStart`` method:
+This creates a thin wrapper that just points to the actual coordinate system used internally by OpenCMISS-Iron, and initially the pointer is null. Trying to use the coordinate system now would raise an exception. To actually construct a coordinate system we call the ``CreateStart`` method and pass it a user number. The user number must be unique between objects of the same type and can be used to identify the coordinate system later. Most OpenCMISS-Iron classes require a user number when creating them, and many also require additional parameters to the ``CreateStart`` method:
 
 .. literalinclude:: Python/LaplaceExample.py
   :linenos:
@@ -112,7 +98,7 @@ When we set the basis type we select a value from the ``BasisTypes`` enum.
 Creating a Decomposed Mesh
 --------------------------
 
-In order to define a simple 3D geometry for our problem we can use one of OpenCMISS's inbuilt generated meshes. We will create a 3D, cuboid mesh with 5 elements in the X, Y and Z directions and tell it to use the basis we created previously:
+In order to define a simple 3D geometry for our problem we can use one of OpenCMISS-Iron's inbuilt generated meshes. We will create a 3D, cuboid mesh with 5 elements in the X, Y and Z directions and tell it to use the basis we created previously:
 
 .. literalinclude:: Python/LaplaceExample.py
   :linenos:
@@ -137,7 +123,7 @@ The next step in this example is to decompose the mesh for the number of computa
   :start-after: #DOC-START decomposition
   :end-before: #DOC-END decomposition
 
-Note that even when we have just one computational node, OpenCMISS still needs to work with a decomposed mesh, which will have one domain.
+Note that even when we have just one computational node, OpenCMISS-Iron still needs to work with a decomposed mesh, which will have one domain.
 
 -----------------
 Defining Geometry
@@ -179,7 +165,7 @@ Now we use our equations set to create a dependent field. This stores the soluti
 
 We haven't used the ``Field.CreateStart`` method to construct the dependent field but have had it automatically constructed by the equations set.
 
-We can initialise our solution with a value we think will be close to the final solution. A field in OpenCMISS can contain multiple `field variables`, and each field variable can have multiple `components`. For the standard Laplace equation, the dependent field has ``U`` (standard variable type i.e., u) and ``DELUDELN`` (normal derivative variable type i.e., du/dn) variables which both have one component. Field variables can also have different field `parameter sets`, for example we can store values at a previous time step in dynamic problems. In this example we are only interested in the ``VALUES`` parameter set:
+We can initialise our solution with a value we think will be close to the final solution. A field in OpenCMISS-Iron can contain multiple `field variables`, and each field variable can have multiple `components`. For the standard Laplace equation, the dependent field has ``U`` (standard variable type i.e., u) and ``DELUDELN`` (normal derivative variable type i.e., du/dn) variables which both have one component. Field variables can also have different field `parameter sets`, for example we can store values at a previous time step in dynamic problems. In this example we are only interested in the ``VALUES`` parameter set:
 
 .. literalinclude:: Python/LaplaceExample.py
   :linenos:
@@ -239,7 +225,7 @@ solver:
 
 Once we've obtained the solver we then set various properties before finishing the creation of all the problem solvers.
 
-After defining our solver we can create the equations for the solver to solve by adding our equations sets to the solver equations. In this example we have just one equations set to add but for coupled problems we may have multiple equations sets in the solver equations. We also tell OpenCMISS to use sparse matrices to store our solver equations:
+After defining our solver we can create the equations for the solver to solve by adding our equations sets to the solver equations. In this example we have just one equations set to add but for coupled problems we may have multiple equations sets in the solver equations. We also tell OpenCMISS-Iron to use sparse matrices to store our solver equations:
 
 .. literalinclude:: Python/LaplaceExample.py
   :linenos:
@@ -250,7 +236,7 @@ After defining our solver we can create the equations for the solver to solve by
 Setting Boundary Conditions
 ---------------------------
 
-The final step in configuring the problem is to define the boundary conditions to be satisfied. We will set the dependent field value at the first node to be zero, and at the last node to be 1.0. These nodes will correspond to opposite corners in our geometry. Because OpenCMISS can solve our problem on multiple computational nodes where each computational node does not necessarily know about all nodes in our mesh, we must first check that the node we are setting the boundary condition at is in our computational node domain:
+The final step in configuring the problem is to define the boundary conditions to be satisfied. We will set the dependent field value at the first node to be zero, and at the last node to be 1.0. These nodes will correspond to opposite corners in our geometry. Because OpenCMISS-Iron can solve our problem on multiple computational nodes where each computational node does not necessarily know about all nodes in our mesh, we must first check that the node we are setting the boundary condition at is in our computational node domain:
 
 .. literalinclude:: Python/LaplaceExample.py
   :linenos:
@@ -261,7 +247,7 @@ In parallel, the exact same code is running on each computational node. When set
 
 The arguments to the ``SetNode`` method are the field, field variable type, node version number, node derivative number, node user number, field component number, boundary condition type and boundary condition value. The version and derivative numbers are one as we aren't using versions and we are setting field values rather than derivative values. We can also only set derivative boundary conditions when using a Hermite basis type. There are a wide number of boundary condition types that can be set but many are only available for certain equation set types and in this example we simply want to fix the field value.
 
-When ``solverEquations.BoundaryConditionsCreateFinish()`` is called OpenCMISS will construct the solver matrices and vectors.
+When ``solverEquations.BoundaryConditionsCreateFinish()`` is called OpenCMISS-Iron will construct the solver matrices and vectors.
 
 Since the Laplace equation is the steady-state heat equation, one physical interpretation of this problem is as follows: fix the temperature on the boundary of the domain according to the given specification of the boundary condition. Allow heat to flow until a stationary state is reached in which the temperature at each point on the domain doesn't change anymore. The temperature distribution in the interior will then be given by the solution to the corresponding Dirichlet problem.
 
@@ -291,7 +277,7 @@ Once the problem has been solved, the dependent field contains the solution to o
 Running the Script in Linux
 ===========================
 
-The Python code given here follows the `Python Laplace example`_ found in the OpenCMISS examples repository. Now we would like to run this script to check that we get the correct output from OpenCMISS. In each case you must change directory to where you downloaded the Python script and data file, then run the script with ``python``. The exact names of the directories may not match what is on your own computer, so you will need to change them as appropriate. Follow the instructions that are applicable for your platform.
+The Python code given here follows the `Python Laplace example`_ found in the OpenCMISS-Iron examples repository. Now we would like to run this script to check that we get the correct output from OpenCMISS-Iron. In each case you must change directory to where you downloaded the Python script and data file, then run the script with ``python``. The exact names of the directories may not match what is on your own computer, so you will need to change them as appropriate. Follow the instructions that are applicable for your platform.
 
 .. _Python Laplace example: https://github.com/OpenCMISS-Examples/laplace/blob/master/Python/LaplaceExample.py
                             
@@ -344,7 +330,7 @@ To see what is happening get another terminal up on hpc3 and type top.
 Output
 ======
   
-If OpenCMISS is installed and running correctly then you should see the solver matrix as output in the console window similar to::
+If OpenCMISS-Iron is installed and running correctly then you should see the solver matrix as output in the console window similar to::
 
       [0.454768E+00  0.453061E+00  0.474333E+00  0.479934E+00  0.482290E+00  0.316870E+00  0.409378E+00  0.462585E+00
        0.472722E+00  0.480318E+00  0.482162E+00  0.402008E+00  0.428823E+00  0.460520E+00  0.473907E+00  0.480185E+00
@@ -374,4 +360,4 @@ If OpenCMISS is installed and running correctly then you should see the solver m
        0.539480E+00  0.571177E+00  0.597992E+00  0.517838E+00  0.519682E+00  0.527278E+00  0.537415E+00  0.590622E+00
        0.683130E+00  0.517710E+00  0.520066E+00  0.525667E+00  0.546939E+00  0.545232E+00]
 
-If this is your first use of OpenCMISS, *congratulations on getting this far!*
+If this is your first use of OpenCMISS-Iron, *congratulations on getting this far!*
